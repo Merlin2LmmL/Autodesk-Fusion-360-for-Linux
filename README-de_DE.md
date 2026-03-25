@@ -291,19 +291,19 @@ Und möchtest du später zusätzliche Funktionen oder Sprachen wie Tschechisch i
 Öffnen Sie ein Terminal und führen Sie folgenden Befehl aus, um Autodesk Fusion in der Basisversion zu installieren:
 
 ```
-curl -L https://raw.githubusercontent.com/cryinkfly/Autodesk-Fusion-360-for-Linux/main/files/setup/autodesk_fusion_installer_x86-64.sh -o "autodesk_fusion_installer_x86-64.sh" && chmod +x autodesk_fusion_installer_x86-64.sh && ./autodesk_fusion_installer_x86-64.sh --install --default
+curl -L https://raw.githubusercontent.com/Merlin2LmmL/Autodesk-Fusion-360-for-Linux/main/files/setup/autodesk_fusion_installer_x86-64.sh -o "autodesk_fusion_installer_x86-64.sh" && chmod +x autodesk_fusion_installer_x86-64.sh && ./autodesk_fusion_installer_x86-64.sh --install --default
 ```
 
 Öffnen Sie ein Terminal und führen Sie folgenden Befehl aus, um Autodesk Fusion mit allen getesteten Erweiterungen zu installieren:
 
 ```
-curl -L https://raw.githubusercontent.com/cryinkfly/Autodesk-Fusion-360-for-Linux/main/files/setup/autodesk_fusion_installer_x86-64.sh -o "autodesk_fusion_installer_x86-64.sh" && chmod +x autodesk_fusion_installer_x86-64.sh && ./autodesk_fusion_installer_x86-64.sh --install --default --full
+curl -L https://raw.githubusercontent.com/Merlin2LmmL/Autodesk-Fusion-360-for-Linux/main/files/setup/autodesk_fusion_installer_x86-64.sh -o "autodesk_fusion_installer_x86-64.sh" && chmod +x autodesk_fusion_installer_x86-64.sh && ./autodesk_fusion_installer_x86-64.sh --install --default --full
 ```
 
 - Öffnen Sie ein Terminal und führen Sie folgenden Befehl zum Deinstallieren aus:
 
 ```
-curl -L https://raw.githubusercontent.com/cryinkfly/Autodesk-Fusion-360-for-Linux/main/files/setup/autodesk_fusion_installer_x86-64.sh -o "autodesk_fusion_installer_x86-64.sh" && chmod +x autodesk_fusion_installer_x86-64.sh && ./autodesk_fusion_installer_x86-64.sh --uninstall
+curl -L https://raw.githubusercontent.com/Merlin2LmmL/Autodesk-Fusion-360-for-Linux/main/files/setup/autodesk_fusion_installer_x86-64.sh -o "autodesk_fusion_installer_x86-64.sh" && chmod +x autodesk_fusion_installer_x86-64.sh && ./autodesk_fusion_installer_x86-64.sh --uninstall
 ```
 
 Alternativ können Sie Autodesk Fusion 360 als Flatpak installieren und verwenden. App: https://usebottles.com/app/#fusion
