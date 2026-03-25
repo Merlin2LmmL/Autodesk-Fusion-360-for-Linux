@@ -5,6 +5,7 @@
 # Description:  This file install Autodesk Fusion on your system.                                  #
 # Author:       Steve Zabka                                                                        #
 # Author URI:   https://cryinkfly.com                                                              #
+# Contributors: Merlin2LmmL                                                                        #
 # License:      MIT                                                                                #
 # Copyright (c) 2020-2026                                                                          #
 # Time/Date:    11:57/21.02.2026                                                                   #
@@ -383,7 +384,7 @@ check_option() {
             autodesk_fusion_shortcuts_load
             autodesk_fusion_safe_logfile
             reset_window_not_responding_dialog
-            xdg-open "https://cryinkfly.com/sponsors/"
+            patch_launcher_remove_steam_dependency
             run_wine_autodesk_fusion
             exit;;
         *)
@@ -1280,6 +1281,56 @@ autodesk_fusion_safe_logfile() {
 }
 
 ##############################################################################################################################################################################
+# PATCH THE DOWNLOADED LAUNCHER TO REMOVE STEAM/PROTON DEPENDENCY:                                                                                                           #
+# The upstream autodesk_fusion_launcher.sh hard-codes paths into Steam's Proton runtime                                                                                      #
+# (~/.local/share/Steam/compatibilitytools.d/DXVK/proton) which do not exist on systems                                                                                      #
+# without Steam. This function rewrites those lines to use the system Wine binary instead.                                                                                    #
+##############################################################################################################################################################################
+
+patch_launcher_remove_steam_dependency() {
+    local LAUNCHER="$SELECTED_DIRECTORY/bin/autodesk_fusion_launcher.sh"
+
+    if [ ! -f "$LAUNCHER" ]; then
+        echo -e "${RED}Launcher script not found at $LAUNCHER — skipping patch.${NOCOLOR}"
+        return 1
+    fi
+
+    echo -e "${YELLOW}Patching launcher to remove Steam/Proton dependency...${NOCOLOR}"
+
+    # Resolve the real wine and wineserver binaries
+    local WINE_BIN
+    WINE_BIN=$(command -v wine)
+    local WINESERVER_BIN
+    WINESERVER_BIN=$(command -v wineserver)
+
+    if [ -z "$WINE_BIN" ] || [ -z "$WINESERVER_BIN" ]; then
+        echo -e "${RED}Could not locate wine or wineserver in PATH — aborting launcher patch.${NOCOLOR}"
+        return 1
+    fi
+
+    # Replace any line that sets WINE or wine to a Steam/Proton path with the system binary.
+    # Handles patterns like:
+    #   WINE="$HOME/.local/share/Steam/compatibilitytools.d/DXVK/proton"
+    #   wine="..."
+    #   /home/.../.local/share/Steam/compatibilitytools.d/DXVK/proton ...args...
+    sed -i \
+        -e "s|['\"]\\?\$HOME/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/proton['\"]\\?|\"$WINE_BIN\"|g" \
+        -e "s|['\"]\\?\$HOME/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/files/bin/wineserver['\"]\\?|\"$WINESERVER_BIN\"|g" \
+        -e "s|['\"]\\?/home/[^/]*/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/proton['\"]\\?|\"$WINE_BIN\"|g" \
+        -e "s|['\"]\\?/home/[^/]*/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/files/bin/wineserver['\"]\\?|\"$WINESERVER_BIN\"|g" \
+        "$LAUNCHER"
+
+    # Patch any Steam background launch lines (e.g. "Starting Steam (background, no window)...")
+    # by removing or no-op-ing them.
+    sed -i \
+        -e '/Starting Steam/d' \
+        -e '/steam.*background/Id' \
+        "$LAUNCHER"
+
+    echo -e "${GREEN}Launcher patched successfully. Using system wine: $WINE_BIN${NOCOLOR}"
+}
+
+##############################################################################################################################################################################
 # ACTIVATE THE WINDOW NOT RESPONDING DIALOG:                                                                                                                                 #
 ##############################################################################################################################################################################
 
@@ -1297,7 +1348,6 @@ reset_window_not_responding_dialog() {
 ##############################################################################################################################################################################
 
 run_wine_autodesk_fusion() {
-    # Execute the Autodesk Fusion 360
     echo -e "$(gettext "${GREEN}Starting Autodesk Fusion 360 ...${NOCOLOR}")"
     sleep 2
     source "$SELECTED_DIRECTORY/bin/autodesk_fusion_launcher.sh"
