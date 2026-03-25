@@ -455,21 +455,22 @@ check_ram() {
     else
         CONVERT_RAM_GIGABYTES=$(awk "BEGIN {printf \"%.2f\", $GET_RAM_KILOBYTES / 1024 / 1024}")
         echo -e "$(gettext "${RED}The total RAM (Random Access Memory) is not greater than 4 GByte ($CONVERT_RAM_GIGABYTES GByte) and Autodesk Fusion may run unstable later with insufficient RAM memory!${NOCOLOR}")"
-        read -p "$(gettext "${YELLOW}Are you sure you want to continue with the installation? (y/n)${NOCOLOR}")" yn
-        case $yn in 
-            y|Y ) 
-                echo -e "$(gettext "${YELLOW}Continuing with the installation...${NOCOLOR}")"
-                ;;
-            n|N ) 
-                echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"
-                exit
-                ;;
-            * ) 
-                echo -e "$(gettext "${RED}Invalid input! The installer was terminated.${NOCOLOR}")"
-                rm -rf "$SELECTED_DIRECTORY"
-                exit 1
-                ;;
-        esac
+        while true; do
+            read -r -p "$(gettext "${YELLOW}Are you sure you want to continue with the installation? (y/n)${NOCOLOR} ")" yn
+            case $yn in
+                y|Y )
+                    echo -e "$(gettext "${YELLOW}Continuing with the installation...${NOCOLOR}")"
+                    break
+                    ;;
+                n|N )
+                    echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"
+                    exit
+                    ;;
+                * )
+                    echo -e "$(gettext "${YELLOW}Please answer with y (yes) or n (no).${NOCOLOR}")"
+                    ;;
+            esac
+        done
     fi
 }
 
@@ -589,15 +590,22 @@ check_gpu_vram() {
     else
         CONVERT_RAM_GIGABYTES=$(awk "BEGIN {printf \"%.2f\", $GET_VRAM_MEGABYTES / 1000}")
         echo -e "$(gettext "${RED}The total VRAM (Video RAM) is not greater than 1 GByte (${CONVERT_RAM_GIGABYTES} GByte) and Autodesk Fusion may run unstable later with insufficient VRAM memory!${NOCOLOR}")"
-        read -p "$(gettext "${YELLOW}Are you sure you want to continue with the installation? (y/n)${NOCOLOR}")" yn
-        case $yn in 
-            y|Y ) echo -e "$(gettext "${GREEN}Continuing with the installation...${NOCOLOR}")";;
-            n|N ) echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")";
-                  exit;;
-            * ) echo -e "$(gettext "${RED}Invalid input. The installer has been terminated!${NOCOLOR}")";
-                rm -rf "$SELECTED_DIRECTORY"
-                exit 1;;
-        esac
+        while true; do
+            read -r -p "$(gettext "${YELLOW}Are you sure you want to continue with the installation? (y/n)${NOCOLOR} ")" yn
+            case $yn in
+                y|Y )
+                    echo -e "$(gettext "${GREEN}Continuing with the installation...${NOCOLOR}")"
+                    break
+                    ;;
+                n|N )
+                    echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"
+                    exit
+                    ;;
+                * )
+                    echo -e "$(gettext "${YELLOW}Please answer with y (yes) or n (no).${NOCOLOR}")"
+                    ;;
+            esac
+        done
     fi
 }
 
@@ -660,12 +668,6 @@ is_snap_firefox_installed() {
 }
 
 check_install_firefox_deb() {
-    # Function to check if Firefox is installed via Snap
-    is_snap_firefox_installed {
-        snap list firefox &> /dev/null
-        return $?
-    }
-
     # Check if Firefox is installed via Snap
     if is_snap_firefox_installed; then
         echo "The installed version of Firefox is from Snap."
