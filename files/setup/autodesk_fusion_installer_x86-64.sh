@@ -1106,6 +1106,13 @@ autodesk_fusion_shortcuts_load() {
 
 # Execute the installation of Autodesk Fusion
 autodesk_fusion_run_install_client() {
+    WINEPREFIX="$WINE_PFX" timeout -k 10m 9m wine \
+        "$SELECTED_DIRECTORY/downloads/FusionClientInstaller.exe" --quiet \
+        2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_1.log"
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}FusionClientInstaller failed! Check logs. Aborting.${NOCOLOR}"
+        exit 1
     echo -e "$(gettext "${YELLOW}Installing Autodesk Fusion 360 Client ...${NOCOLOR}")"
     sleep 2
     WINEPREFIX="$WINE_PFX" timeout -k 10m 9m wine "$SELECTED_DIRECTORY/downloads/FusionClientInstaller.exe" --quiet 2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_1.log"
