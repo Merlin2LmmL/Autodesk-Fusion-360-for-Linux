@@ -1125,31 +1125,30 @@ autodesk_fusion_run_install_client() {
 ###############################################################################################################################################################
 
 # Patch the Qt6WebEngineCore.dll to fix the login issue and other issues
-autodesk_fusion_patch_qt6webenginecore() {
-    # Find the Qt6WebEngineCore.dll file in the Autodesk Fusion directory
-    QT6_WEBENGINECORE=$(find "$WINE_PFX" -name 'Qt6WebEngineCore.dll' -printf "%T+ %p\n" | sort -r | head -n 1 | sed -r 's/^[^ ]+ //')
-    QT6_WEBENGINECORE_DIR=$(dirname "$QT6_WEBENGINECORE")
+autodesk_fusion_run_install_client() {
+    echo -e "$(gettext "${YELLOW}Installing Autodesk Fusion 360 Client ...${NOCOLOR}")"
+    sleep 2
+    WINEPREFIX="$WINE_PFX" timeout -k 10m 9m wine \
+        "$SELECTED_DIRECTORY/downloads/FusionClientInstaller.exe" --quiet \
+        2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_1.log"
 
-    echo "$QT6_WEBENGINECORE_DIR"
-
-    echo -e "${YELLOW}The old Qt6WebEngineCore.dll file is located in the following directory: $QT6_WEBENGINECORE_DIR${NOCOLOR}"
-
-    # Check if the Qt6WebEngineCore.dll file exists before attempting to backup
-    if [ -f "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll" ]; then
-        # Backup the Qt6WebEngineCore.dll file
-        cp -f "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll" "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll.bak"
-        echo -e "${GREEN}The Qt6WebEngineCore.dll file is backed up as Qt6WebEngineCore.dll.bak!${NOCOLOR}"
-    else
-        echo -e "${RED}The Qt6WebEngineCore.dll file does not exist. No backup was made.${NOCOLOR}"
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}FusionClientInstaller failed (exit code $?)! Check logs. Aborting.${NOCOLOR}"
+        exit 1
     fi
 
-    # Patch the Qt6WebEngineCore.dll file
-    echo -e "${YELLOW}Patching the Qt6WebEngineCore.dll file for Autodesk Fusion ...${NOCOLOR}"
-    sleep 2
+    sleep 5
+    echo -e "$(gettext "${YELLOW}Finalizing Autodesk Fusion 360 installation...${NOCOLOR}")"
+    WINEPREFIX="$WINE_PFX" timeout -k 5m 1m wine \
+        "$SELECTED_DIRECTORY/downloads/FusionClientInstaller.exe" --quiet \
+        2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_2.log"
 
-    # Copy the patched Qt6WebEngineCore.dll file to the Autodesk Fusion directory
-    cp -f "$SELECTED_DIRECTORY/downloads/Qt6WebEngineCore.dll" "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll"
-    echo -e "${GREEN}The Qt6WebEngineCore.dll file is patched successfully!${NOCOLOR}"
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Fusion finalization step failed! Check FusionClientInstaller_2.log. Aborting.${NOCOLOR}"
+        exit 1
+    fi
+
+    echo -e "$(gettext "${GREEN}Autodesk Fusion 360 Client installation completed!${NOCOLOR}")"
 }  
 
 ###############################################################################################################################################################
