@@ -87,13 +87,10 @@ check_required_packages() {
     VERSION=$(grep "^VERSION_ID=" /etc/*-release | cut -d'=' -f2 | tr -d '"')
     DISTRO_VERSION="$DISTRO $VERSION"
 
-    # Example required commands, now including "xrandr" and "bc"
     REQUIRED_COMMANDS=("curl" "lsb_release" "glxinfo" "pkexec" "wget" "xdg-open" "ls" "cat" "echo" "awk" "7z" "cabextract" "samba" "wbinfo" "systemctl" "bc" "xrandr" "mokutil")
 
-    # Array to store missing commands
     MISSING_COMMANDS=()
 
-    # Check for required commands
     for cmd in "${REQUIRED_COMMANDS[@]}"; do
         echo -e "${YELLOW}Checking for required command: ${cmd} ...${NOCOLOR}"
         if command -v "$cmd" &>/dev/null; then
@@ -146,7 +143,6 @@ check_required_packages() {
                         echo -e "${GREEN}The required command (${cmd}) is available!${NOCOLOR}"
                     fi
                     ;;
-
                 mokutil)
                     if ! mokutil --list-enrolled &>/dev/null; then
                         echo -e "${RED}The required command (${cmd}) is not available!${NOCOLOR}"
@@ -165,17 +161,13 @@ check_required_packages() {
         fi
     done
 
-    # If there are missing commands, install them
     if [ ${#MISSING_COMMANDS[@]} -gt 0 ]; then
         install_required_packages
     else
         echo -e "${GREEN}All required commands are available!${NOCOLOR}"
     fi
 
-    # Check if Firefox is installed
     firefox_version=$(get_firefox_version)
-
-    # Check if Firefox is installed via Snap and prompt user to install DEB version
     check_install_firefox_deb
 }
 
@@ -187,90 +179,90 @@ install_required_packages() {
     echo -e "$(gettext "${YELLOW}The installer will install the required packages for the installation!")${NOCOLOR}"
     echo -e "$(gettext "${RED}Missing package: ${cmd}")${NOCOLOR}"
     sleep 2
-        if [[ $DISTRO_VERSION == *"arch"* ]] || [[ $DISTRO_VERSION == *"manjaro"* ]] || [[ $DISTRO_VERSION == *"endeavouros"* ]] || [[ $DISTRO_VERSION == *"cachyos"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            sudo pacman -S gawk cabextract coreutils curl lsb-release mesa-demos mesa-utils p7zip polkit samba wget libspnav xdg-utils bc xorg-xrandr mokutil --noconfirm
-            sudo systemctl enable spacenavd
-            sudo systemctl start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"debian"* ]] || [[ $DISTRO_VERSION == *"ubuntu"* ]] \
-        || [[ $DISTRO_VERSION == *"mint"* ]] || [[ $DISTRO_VERSION == *"pop"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            sudo apt-get install -y gawk cabextract coreutils curl lsb-release mesa-utils p7zip p7zip-full p7zip-rar policykit-1 samba spacenavd winbind wget xdg-utils bc x11-xserver-utils
-            sudo systemctl enable spacenavd
-            sudo systemctl start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"fedora"* ]] || [[ $DISTRO_VERSION == *"nobara"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
+    if [[ $DISTRO_VERSION == *"arch"* ]] || [[ $DISTRO_VERSION == *"manjaro"* ]] || [[ $DISTRO_VERSION == *"endeavouros"* ]] || [[ $DISTRO_VERSION == *"cachyos"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo pacman -S gawk cabextract coreutils curl lsb-release mesa-demos mesa-utils p7zip polkit samba wget libspnav xdg-utils bc xorg-xrandr mokutil --noconfirm
+        sudo systemctl enable spacenavd
+        sudo systemctl start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"debian"* ]] || [[ $DISTRO_VERSION == *"ubuntu"* ]] \
+    || [[ $DISTRO_VERSION == *"mint"* ]] || [[ $DISTRO_VERSION == *"pop"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo apt-get install -y gawk cabextract coreutils curl lsb-release mesa-utils p7zip p7zip-full p7zip-rar policykit-1 samba spacenavd winbind wget xdg-utils bc x11-xserver-utils
+        sudo systemctl enable spacenavd
+        sudo systemctl start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"fedora"* ]] || [[ $DISTRO_VERSION == *"nobara"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo dnf install -y cabextract coreutils curl gawk lsb_release mesa-demos p7zip p7zip-plugins polkit samba-dc samba-winbind samba-winbind-clients spacenavd wget xdg-utils bc xrandr
+        sudo systemctl enable spacenavd
+        sudo systemctl start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"gentoo"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo emerge -q app-admin/samba app-misc/spacenavd app-arch/cabextract app-arch/p7zip net-misc/curl net-misc/wget sys-apps/coreutils sys-apps/gawk sys-apps/lsb-release sys-auth/polkit x11-apps/mesa-progs x11-misc/xdg-utils sys-apps/bc x11-apps/xrandr
+        sudo rc-update add spacenavd default
+        sudo /etc/init.d/spacenavd start
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"nixos"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo nix-env -iA gawk nixos.cabextract nixos.coreutils nixos.curl nixos.lsb_release nixos.mesa-utils nixos.p7zip nixos.polkit nixos.samba nixos.spacenavd nixos.wget nixos.winbind nixos.xdg_utils nixos.bc nixos.xrandr
+        sudo systemctl enable spacenavd
+        sudo systemctl start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"opensuse"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo zypper install -y cabextract coreutils curl gawk lsb-release Mesa-demo-x p7zip-full polkit samba samba-client samba-winbind spacenavd wget wine xdg-utils bc xrandr
+        sudo systemctl enable spacenavd
+        sudo systemctl start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"red"*"hat"*"enterprise"* ]] || [[ $DISTRO_VERSION == *"alma"* ]] || [[ $DISTRO_VERSION == *"rocky"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        if command -v dnf &> /dev/null; then
             sudo dnf install -y cabextract coreutils curl gawk lsb_release mesa-demos p7zip p7zip-plugins polkit samba-dc samba-winbind samba-winbind-clients spacenavd wget xdg-utils bc xrandr
-            sudo systemctl enable spacenavd
-            sudo systemctl start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"gentoo"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            sudo emerge -q app-admin/samba app-misc/spacenavd app-arch/cabextract app-arch/p7zip net-misc/curl net-misc/wget sys-apps/coreutils sys-apps/gawk sys-apps/lsb-release sys-auth/polkit x11-apps/mesa-progs x11-misc/xdg-utils sys-apps/bc x11-apps/xrandr
-            sudo rc-update add spacenavd default
-            sudo /etc/init.d/spacenavd start
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"nixos"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            sudo nix-env -iA gawk nixos.cabextract nixos.coreutils nixos.curl nixos.lsb_release nixos.mesa-utils nixos.p7zip nixos.polkit nixos.samba nixos.spacenavd nixos.wget nixos.winbind nixos.xdg_utils nixos.bc nixos.xrandr
-            sudo systemctl enable spacenavd
-            sudo systemctl start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"opensuse"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            sudo zypper install -y cabextract coreutils curl gawk lsb-release Mesa-demo-x p7zip-full polkit samba samba-client samba-winbind spacenavd wget wine xdg-utils bc xrandr
-            sudo systemctl enable spacenavd
-            sudo systemctl start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"red"*"hat"*"enterprise"* ]] || [[ $DISTRO_VERSION == *"alma"* ]] || [[ $DISTRO_VERSION == *"rocky"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            if command -v dnf &> /dev/null; then # Use dnf for newer distributions
-                sudo dnf install -y cabextract coreutils curl gawk lsb_release mesa-demos p7zip p7zip-plugins polkit samba-dc samba-winbind samba-winbind-clients spacenavd wget xdg-utils bc xrandr
-            else  # Use yum for older distributions
-                sudo yum install -y cabextract coreutils curl gawk lsb_release mesa-demos p7zip p7zip-plugins polkit samba-dc samba-winbind samba-winbind-clients spacenavd wget xdg-utils bc xrandr
-            fi
-            sudo systemctl enable spacenavd
-            sudo systemctl start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"solus"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            sudo eopkg -y install gawk cabextract coreutils curl lsb-release mesa-utils p7zip p7zip-plugins spacenavd polkit wget winbind xdg-utils bc xrandr
-            sudo systemctl enable spacenavd
-            sudo systemctl start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
-        elif [[ $DISTRO_VERSION == *"void"* ]]; then
-            echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
-            sleep 2
-            sudo xbps-install -Sy gawk cabextract coreutils curl lsb-release mesa-demos p7zip-full polkit samba-winbind spacenavd wget xdg-utils bc xrandr
-            sudo ln -s /usr/sbin/spacenavd /etc/sv/spacenavd
-            sudo sv enable spacenavd
-            sudo sv start spacenavd
-            echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
-            sleep 2
         else
-            echo -e "$(gettext "${RED}The installer doesn't support your current Linux distribution $distro_version at this time!")${NOCOLOR}"; 
-            echo -e "$(gettext "${RED}The installer has been terminated!")${NOCOLOR}"
-            sleep 2
-            exit;
+            sudo yum install -y cabextract coreutils curl gawk lsb_release mesa-demos p7zip p7zip-plugins polkit samba-dc samba-winbind samba-winbind-clients spacenavd wget xdg-utils bc xrandr
         fi
+        sudo systemctl enable spacenavd
+        sudo systemctl start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"solus"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo eopkg -y install gawk cabextract coreutils curl lsb-release mesa-utils p7zip p7zip-plugins spacenavd polkit wget winbind xdg-utils bc xrandr
+        sudo systemctl enable spacenavd
+        sudo systemctl start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    elif [[ $DISTRO_VERSION == *"void"* ]]; then
+        echo -e "$(gettext "${YELLOW}All required packages for the installer will be installed!")${NOCOLOR}"
+        sleep 2
+        sudo xbps-install -Sy gawk cabextract coreutils curl lsb-release mesa-demos p7zip-full polkit samba-winbind spacenavd wget xdg-utils bc xrandr
+        sudo ln -s /usr/sbin/spacenavd /etc/sv/spacenavd
+        sudo sv enable spacenavd
+        sudo sv start spacenavd
+        echo -e "$(gettext "${GREEN}All required packages for the installer are installed!")${NOCOLOR}"
+        sleep 2
+    else
+        echo -e "$(gettext "${RED}The installer doesn't support your current Linux distribution $DISTRO_VERSION at this time!")${NOCOLOR}"
+        echo -e "$(gettext "${RED}The installer has been terminated!")${NOCOLOR}"
+        sleep 2
+        exit
+    fi
 }
 
 ##############################################################################################################################################################################
@@ -282,22 +274,17 @@ download_translations() {
     curl -o "./locale/update-locale.sh" "$UPDATER_TRANSLATIONS_URL"
     chmod +x "./locale/update-locale.sh"
 
-    # Curl the translations for the installer
     for locale in "${!TRANSLATION_URLS[@]}"; do
         local TRANSLATION_FILE_URL="${TRANSLATION_URLS[$locale]}"
         local TRANSLATION_FILE_DIRECTORY="./locale/$locale/LC_MESSAGES/autodesk_fusion.po"
-        
         mkdir -p "$(dirname "$TRANSLATION_FILE_DIRECTORY")"
         curl -L "$TRANSLATION_FILE_URL" -o "$TRANSLATION_FILE_DIRECTORY"
     done
 
     source "./locale/update-locale.sh"
 
-    # SET THE TEXTDOMAIN FOR THE INSTALLER:
     TEXTDOMAIN="autodesk_fusion"
     TEXTDOMAINDIR="./locale"
-
-    # Load translations
     export TEXTDOMAIN
     export TEXTDOMAINDIR
 }
@@ -311,12 +298,6 @@ check_option() {
         "--uninstall")
             clear
             echo "$(gettext "${YELLOW}Starting the uninstallation process ...${NOCOLOR}")"
-            # Show a list of two options with:
-            # 1. Are you sure you want to uninstall Autodesk Fusion and all its components?
-            # 2. Uninstall only a specific Wineprefix of Autodesk Fusion
-
-
-
             read -p "$(gettext "${GREEN}Do you really want to uninstall Autodesk Fusion?${NOCOLOR}") [y/n] " yn
             case $yn in
                 [Yy]* ) echo "$(gettext "${YELLOW}1. Uninstall Autodesk Fusion with all Wineprefixes and components${NOCOLOR}")"
@@ -325,17 +306,14 @@ check_option() {
 
                         case $uninstall_option in
                             1) echo "$(gettext "${RED}Uninstall Autodesk Fusion with all Wineprefixes and components${NOCOLOR}")"
-                               rm -rf "$SELECTED_DIRECTORY";
-                               rm -rf "$HOME/.local/share/applications/wine/Programs/Autodesk/Autodesk Fusion.desktop";
+                               rm -rf "$SELECTED_DIRECTORY"
+                               rm -rf "$HOME/.local/share/applications/wine/Programs/Autodesk/Autodesk Fusion.desktop"
                                echo "$(gettext "${GREEN}Autodesk Fusion has been uninstalled successfully!${NOCOLOR}")"
                                exit;;
                             2) echo "$(gettext "${GREEN}Listing all Wineprefixes of Autodesk Fusion in the ${SELECTED_DIRECTORY}/wineprefixes/ directory${NOCOLOR}")"
-                               # Initialize counter
                                COUNTER=1
                                for wp in "$SELECTED_DIRECTORY/wineprefixes/"*; do
-                                  # Display the counter and wineprefix name
                                   echo "$(gettext "${YELLOW}${COUNTER}. $(basename "$wp")${NOCOLOR}")"
-                                  # Increment the counter
                                   COUNTER=$((COUNTER + 1))
                                done
                                read -p "$(gettext "${RED}Enter the number of the Wineprefix you want to uninstall or type 'exit' to cancel the process: ${NOCOLOR}")" DEL_SELECTED_WINEPREFIX
@@ -344,16 +322,16 @@ check_option() {
                                          exit;;
                                    *) DEL_SELECTED_WINEPREFIX=$(ls "$SELECTED_DIRECTORY/wineprefixes/" | sed -n "${DEL_SELECTED_WINEPREFIX}p")
                                       echo "$(gettext "${YELLOW}Uninstalling the selected Wineprefix ...${NOCOLOR}")"
-                                      rm -rf "$SELECTED_DIRECTORY/wineprefixes/$DEL_SELECTED_WINEPREFIX";
+                                      rm -rf "$SELECTED_DIRECTORY/wineprefixes/$DEL_SELECTED_WINEPREFIX"
                                       echo "$(gettext "${GREEN}The selected Wineprefix has been uninstalled successfully!${NOCOLOR}")"
                                       exit;;
-                               esac;;  
+                               esac;;
                             *) echo "$(gettext "${RED}Please select a valid option!${NOCOLOR}")"
                                exit;;
-                        esac;;  
-                [Nn]* ) echo -e "$(gettext "${GREEN}The uninstallation process has been canceled!")${NOCOLOR}"; 
+                        esac;;
+                [Nn]* ) echo -e "$(gettext "${GREEN}The uninstallation process has been canceled!")${NOCOLOR}"
                         exit;;
-                * ) echo -e "$(gettext "${YELLOW}Please answer with yes or no!${NOCOLOR}")";
+                * ) echo -e "$(gettext "${YELLOW}Please answer with yes or no!${NOCOLOR}")"
                     exit;;
             esac
             ;;
@@ -388,7 +366,7 @@ check_option() {
             run_wine_autodesk_fusion
             exit;;
         *)
-            echo -e "$(gettext "${RED}Invalid option! Please use the --install or --uninstall flag!")${NOCOLOR}";
+            echo -e "$(gettext "${RED}Invalid option! Please use the --install or --uninstall flag!")${NOCOLOR}"
             exit;;
     esac
 }
@@ -398,9 +376,7 @@ check_option() {
 ##############################################################################################################################################################################
 
 deactivate_window_not_responding_dialog() {
-    # Check if desktop environment is GNOME
     if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
-        # Disable the "Window not responding" Dialog in GNOME for 30 minutes:
         echo -e "$(gettext "${YELLOW}The 'Window not responding' Dialog in GNOME will be disabled for 30 minutes!")${NOCOLOR}"
         gsettings set org.gnome.mutter check-alive-timeout 1800000
     fi
@@ -421,17 +397,15 @@ create_data_structure() {
 }
 
 ##############################################################################################################################################################################
-# CHECK IF SECURE BOOT IS DEACTIVATED ON A LINUX SYSTEM FOR LOADING DRIVER MODULES (FOR EXAMPLE: NVIDIA GPU DRIVER):                                                          #
+# CHECK IF SECURE BOOT IS DEACTIVATED:                                                                                                                                       #
 ##############################################################################################################################################################################
 
-# Function to check if Secure Boot is activated
 check_secure_boot() {
     if ! command -v mokutil &> /dev/null; then
-        echo "${RED} mokutil command not found. Please install it to check Secure Boot status.${NOCOLOR}"
+        echo "${RED}mokutil command not found. Please install it to check Secure Boot status.${NOCOLOR}"
         exit 1
     fi
 
-    # Check if Secure Boot is enabled
     if mokutil --sb-state | grep -qE 'Secure Boot enabled|SecureBoot enabled'; then
         echo "Secure Boot is enabled."
         SECURE_BOOT=1
@@ -442,48 +416,37 @@ check_secure_boot() {
 }
 
 ##############################################################################################################################################################################
-# CHECKING THE MINIMUM RAM (RANDOM ACCESS MEMORY) REQUIREMENT:                                                                                                               #
+# CHECKING THE MINIMUM RAM REQUIREMENT:                                                                                                                                      #
 ##############################################################################################################################################################################
 
 check_ram() {
-    # Get total RAM space in kilobytes
     GET_RAM_KILOBYTES=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-    
-    # Check if the total memory is greater than 4000 Megabytes
+
     if awk "BEGIN {exit !($GET_RAM_KILOBYTES > 4000 * 1024)}"; then
         CONVERT_RAM_GIGABYTES=$(awk "BEGIN {printf \"%.2f\", $GET_RAM_KILOBYTES / 1024 / 1024}")
-        echo -e "$(gettext "${GREEN}The total RAM (Random Access Memory) is greater than 4 GByte ($CONVERT_RAM_GIGABYTES GByte) and Autodesk Fusion will run more stable later!${NOCOLOR}")"
+        echo -e "$(gettext "${GREEN}The total RAM is greater than 4 GByte ($CONVERT_RAM_GIGABYTES GByte) and Autodesk Fusion will run more stable later!${NOCOLOR}")"
     else
         CONVERT_RAM_GIGABYTES=$(awk "BEGIN {printf \"%.2f\", $GET_RAM_KILOBYTES / 1024 / 1024}")
-        echo -e "$(gettext "${RED}The total RAM (Random Access Memory) is not greater than 4 GByte ($CONVERT_RAM_GIGABYTES GByte) and Autodesk Fusion may run unstable later with insufficient RAM memory!${NOCOLOR}")"
+        echo -e "$(gettext "${RED}The total RAM is not greater than 4 GByte ($CONVERT_RAM_GIGABYTES GByte) and Autodesk Fusion may run unstable later!${NOCOLOR}")"
         while true; do
             read -r -p "$(gettext "${YELLOW}Are you sure you want to continue with the installation? (y/n)${NOCOLOR} ")" yn
             case $yn in
-                y|Y )
-                    echo -e "$(gettext "${YELLOW}Continuing with the installation...${NOCOLOR}")"
-                    break
-                    ;;
-                n|N )
-                    echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"
-                    exit
-                    ;;
-                * )
-                    echo -e "$(gettext "${YELLOW}Please answer with y (yes) or n (no).${NOCOLOR}")"
-                    ;;
+                y|Y ) echo -e "$(gettext "${YELLOW}Continuing with the installation...${NOCOLOR}")"; break ;;
+                n|N ) echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"; exit ;;
+                *   ) echo -e "$(gettext "${YELLOW}Please answer with y (yes) or n (no).${NOCOLOR}")" ;;
             esac
         done
     fi
 }
 
 ##############################################################################################################################################################################
-# CHECK GPU DRIVER FOR THE INSTALLER:                                                                                                                                        #
+# CHECK GPU DRIVER:                                                                                                                                                          #
 ##############################################################################################################################################################################
 
 check_gpu_driver() {
     echo -e "$(gettext "${YELLOW}Checking the GPU drivers for the installer...${NOCOLOR}")"
-    
+
     if (( !SECURE_BOOT )); then
-        # If Secure Boot is disabled, check NVIDIA GPU
         if nvidia-smi &>/dev/null; then
             NVIDIA_PRESENT=1
             NVIDIA_VRAM=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -n1)
@@ -505,117 +468,81 @@ check_gpu_driver() {
     fi
 
     if (( SECURE_BOOT && NVIDIA_PRESENT )); then
-        # If Secure Boot is enabled and the NVIDIA GPU is detected, the NVIDIA GPU should use OpenGL.
         GPU_DRIVER="OpenGL"
         GET_VRAM_MEGABYTES="$NVIDIA_VRAM"
         echo -e "$(gettext "${GREEN}Secure Boot is enabled. The OpenGL GPU driver is being used for the NVIDIA GPU.${NOCOLOR}")"
-    #elif (( !SECURE_BOOT )); then # WHY????
-    else 
+    else
         echo -e "$(gettext "${GREEN}Secure Boot is disabled. Checking available GPU drivers...${NOCOLOR}")"
-        # If Secure Boot is disabled, handle GPU selection
         if (( NVIDIA_PRESENT && (INTEL_PRESENT || AMD_PRESENT) )); then
             echo -e "$(gettext "${YELLOW}Multiple GPUs detected. Please select which one to use (default is DXVK):${NOCOLOR}")"
             echo "1) NVIDIA"
             echo "2) ${INTEL_AMD_GPU}"
             read -p "Enter your choice (1 or 2): " gpu_choice
-            
             case $gpu_choice in
-                1)
-                    GPU_DRIVER="DXVK"
-                    GET_VRAM_MEGABYTES="$NVIDIA_VRAM"
-                    echo -e "$(gettext "${GREEN}NVIDIA GPU selected. The DXVK GPU driver will be used for installation.${NOCOLOR}")"
-                    ;;
-                2)
-                    GPU_DRIVER="OpenGL"
-                    GET_VRAM_MEGABYTES="$INTEL_AMD_VRAM"
-                    echo -e "$(gettext "${GREEN}The OpenGL GPU fallback driver is used for the installation.${NOCOLOR}")"
-                    ;;
-                *)
-                    GPU_DRIVER="OpenGL"
-                    GET_VRAM_MEGABYTES="$INTEL_VRAM"
-                    ;;
+                1) GPU_DRIVER="DXVK"; GET_VRAM_MEGABYTES="$NVIDIA_VRAM"
+                   echo -e "$(gettext "${GREEN}NVIDIA GPU selected. The DXVK GPU driver will be used.${NOCOLOR}")" ;;
+                2) GPU_DRIVER="OpenGL"; GET_VRAM_MEGABYTES="$INTEL_AMD_VRAM"
+                   echo -e "$(gettext "${GREEN}The OpenGL GPU fallback driver is used.${NOCOLOR}")" ;;
+                *) GPU_DRIVER="OpenGL"; GET_VRAM_MEGABYTES="$INTEL_VRAM" ;;
             esac
         elif (( NVIDIA_PRESENT )); then
-            GPU_DRIVER="DXVK"
-            GET_VRAM_MEGABYTES="$NVIDIA_VRAM"
+            GPU_DRIVER="DXVK"; GET_VRAM_MEGABYTES="$NVIDIA_VRAM"
             echo -e "$(gettext "${GREEN}The DXVK GPU driver is used for the installation.${NOCOLOR}")"
         elif (( AMD_PRESENT )); then
-            GPU_DRIVER="DXVK"
-            GET_VRAM_MEGABYTES="$AMD_VRAM"
+            GPU_DRIVER="DXVK"; GET_VRAM_MEGABYTES="$AMD_VRAM"
             echo -e "$(gettext "${GREEN}The DXVK GPU driver is used for the installation.${NOCOLOR}")"
         elif (( INTEL_PRESENT )); then
-            GPU_DRIVER="OpenGL"
-            GET_VRAM_MEGABYTES="$INTEL_VRAM"
+            GPU_DRIVER="OpenGL"; GET_VRAM_MEGABYTES="$INTEL_VRAM"
             echo -e "$(gettext "${GREEN}The OpenGL GPU fallback driver is used for the installation.${NOCOLOR}")"
         else
             echo -e "$(gettext "${RED}No GPU driver detected on your system!${NOCOLOR}")"
             GET_VRAM_MEGABYTES=0
         fi
-    #else
-    #    echo -e "$(gettext "${RED}No GPU driver detected on your system!${NOCOLOR}")"
-    #    GET_VRAM_MEGABYTES=0
     fi
 
     sleep 2
 
-    # Get the current display resolution of the main monitor if more than one is connected.
     MONITOR_RESOLUTION=$(xrandr 2>/dev/null | grep 'primary' | awk '{print $4}' | cut -d'+' -f1)
-
-    # If the $MONITOR_RESOLUTION value is empty, set it to "1920x1080"
     if [ -z "$MONITOR_RESOLUTION" ]; then
         MONITOR_RESOLUTION="1920x1080"
     fi
-
-    # Output the resolution
     echo -e "$(gettext "${GREEN}Main monitor resolution: $MONITOR_RESOLUTION ${NOCOLOR}")"
 
     sleep 2
 }
 
 ##############################################################################################################################################################################
-# CHECKING THE MINIMUM VRAM (VIDEO RAM) REQUIREMENT:                                                                                                                         #
+# CHECKING THE MINIMUM VRAM REQUIREMENT:                                                                                                                                     #
 ##############################################################################################################################################################################
 
 check_gpu_vram() {
-    # Get the total memory of the graphics card in megabytes from check_gpu_driver
-
     if [ -z "$GET_VRAM_MEGABYTES" ]; then
         echo -e "$(gettext "${RED}Could not determine VRAM size.${NOCOLOR}")"
         exit 1
     fi
-    
-    # Check if the total memory is greater than 1000 Megabytes
+
     if awk -v vram="$GET_VRAM_MEGABYTES" 'BEGIN {exit !(vram > 1000)}'; then
         CONVERT_RAM_GIGABYTES=$(awk "BEGIN {printf \"%.2f\", $GET_VRAM_MEGABYTES / 1000}")
-        echo -e "$(gettext "${GREEN}The total VRAM (Video RAM) is greater than 1 GByte (${CONVERT_RAM_GIGABYTES} GByte) and Autodesk Fusion will run more stable later!${NOCOLOR}")"
+        echo -e "$(gettext "${GREEN}The total VRAM is greater than 1 GByte (${CONVERT_RAM_GIGABYTES} GByte) and Autodesk Fusion will run more stable later!${NOCOLOR}")"
     else
         CONVERT_RAM_GIGABYTES=$(awk "BEGIN {printf \"%.2f\", $GET_VRAM_MEGABYTES / 1000}")
-        echo -e "$(gettext "${RED}The total VRAM (Video RAM) is not greater than 1 GByte (${CONVERT_RAM_GIGABYTES} GByte) and Autodesk Fusion may run unstable later with insufficient VRAM memory!${NOCOLOR}")"
+        echo -e "$(gettext "${RED}The total VRAM is not greater than 1 GByte (${CONVERT_RAM_GIGABYTES} GByte) and Autodesk Fusion may run unstable later!${NOCOLOR}")"
         while true; do
             read -r -p "$(gettext "${YELLOW}Are you sure you want to continue with the installation? (y/n)${NOCOLOR} ")" yn
             case $yn in
-                y|Y )
-                    echo -e "$(gettext "${GREEN}Continuing with the installation...${NOCOLOR}")"
-                    break
-                    ;;
-                n|N )
-                    echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"
-                    exit
-                    ;;
-                * )
-                    echo -e "$(gettext "${YELLOW}Please answer with y (yes) or n (no).${NOCOLOR}")"
-                    ;;
+                y|Y ) echo -e "$(gettext "${GREEN}Continuing with the installation...${NOCOLOR}")"; break ;;
+                n|N ) echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"; exit ;;
+                *   ) echo -e "$(gettext "${YELLOW}Please answer with y (yes) or n (no).${NOCOLOR}")" ;;
             esac
         done
     fi
 }
 
 ##############################################################################################################################################################################
-# CHECKING THE MINIMUM DISK SPACE (DEFAULT: HOME-PARTITION) REQUIREMENT:                                                                                                     #
+# CHECKING THE MINIMUM DISK SPACE REQUIREMENT:                                                                                                                               #
 ##############################################################################################################################################################################
 
 check_disk_space() {
-    # Get the free disk space in the selected directory
     GET_DISK_SPACE=$(df -h "$SELECTED_DIRECTORY" 2>/dev/null | awk 'NR==2 {print $4}')
 
     if [[ -z "$GET_DISK_SPACE" ]]; then
@@ -625,11 +552,9 @@ check_disk_space() {
 
     echo -e "$(gettext "${GREEN}The free disk memory size is: $GET_DISK_SPACE${NOCOLOR}")"
 
-    # Extract numerical value and unit, and replace comma with dot
     DISK_SPACE_NUM=$(echo "$GET_DISK_SPACE" | sed 's/[A-Za-z]//g' | sed 's/,/./g')
     DISK_SPACE_UNIT=$(echo "$GET_DISK_SPACE" | sed 's/[0-9.,]//g')
 
-    # Convert to gigabytes
     case $DISK_SPACE_UNIT in
         G) DISK_SPACE_GB=$DISK_SPACE_NUM ;;
         M) DISK_SPACE_GB=$(echo "scale=2; $DISK_SPACE_NUM / 1024" | bc) ;;
@@ -637,11 +562,10 @@ check_disk_space() {
         *) DISK_SPACE_GB=0 ;;
     esac
 
-    # Check if the free disk space is greater than 10GB
     if (( $(echo "$DISK_SPACE_GB > 10" | bc -l) )); then
         echo -e "$(gettext "${GREEN}The free disk memory size is greater than 10GB.${NOCOLOR}")"
     else
-        echo -e "$(gettext "${YELLOW}There is not enough disk free memory to continue installing Fusion on your system!${NOCOLOR}")"
+        echo -e "$(gettext "${YELLOW}There is not enough free disk space to install Fusion on your system!${NOCOLOR}")"
         echo -e "$(gettext "${YELLOW}Make more space in your selected disk or select a different hard drive.${NOCOLOR}")"
         echo -e "$(gettext "${RED}The installer has been terminated!${NOCOLOR}")"
         exit 1
@@ -649,7 +573,7 @@ check_disk_space() {
 }
 
 ##############################################################################################################################################################################
-# CHECK FIREFOX VERSION FOR THE INSTALLER:                                                                                                                                   #
+# CHECK FIREFOX VERSION:                                                                                                                                                     #
 ##############################################################################################################################################################################
 
 get_firefox_version() {
@@ -661,7 +585,7 @@ get_firefox_version() {
 }
 
 is_snap_firefox_installed() {
-    if snap list | grep -q firefox; then
+    if snap list 2>/dev/null | grep -q firefox; then
         return 0
     else
         return 1
@@ -669,38 +593,29 @@ is_snap_firefox_installed() {
 }
 
 check_install_firefox_deb() {
-    # Check if Firefox is installed via Snap
     if is_snap_firefox_installed; then
         echo "The installed version of Firefox is from Snap."
         echo "It is recommended to install the DEB version for better performance and compatibility."
 
-        # Prompt user for action
         read -p "Do you want to uninstall the Snap version of Firefox and install the DEB version? (y/n): " choice
 
         if [[ "$choice" =~ ^[Yy]$ ]]; then
             echo "Proceeding with the uninstallation of the Snap version and installation of the DEB version..."
 
-            # Uninstall Firefox Snap
-            sudo snap remove -y firefox
+            sudo snap remove firefox
 
-            # Create an APT keyring directory if it doesn't exist
             sudo install -d -m 0755 /etc/apt/keyrings
-
-            # Import the Mozilla APT repo signing key
             wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
 
-            # Add Mozilla APT repo to sources.list
             echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee /etc/apt/sources.list.d/mozilla.list > /dev/null
 
-            # Set package priority to ensure DEB version is default
             echo '
 Package: *
 Pin: origin packages.mozilla.org
 Pin-Priority: 1000
 ' | sudo tee /etc/apt/preferences.d/mozilla
 
-            # Update and install Firefox DEB version
-            sudo apt update && sudo apt install -y firefox
+            sudo apt update && sudo apt install -y --allow-downgrades firefox
 
             echo "Firefox DEB version installed successfully."
         else
@@ -718,40 +633,30 @@ Pin-Priority: 1000
 download_files() {
     echo -e "$(gettext "${GREEN}Downloading the required files for the installation ...${NOCOLOR}")"
     sleep 2
-    # Download the newest winetricks version:
+
     download_file "winetricks" "$WINETRICKS_URL" "$SELECTED_DIRECTORY/bin"
     chmod +x "$SELECTED_DIRECTORY/bin/winetricks"
 
-    # Search for an existing installer of Autodesk Fusion and download it if it doesn't exist or is older than 7 days
     download_file "FusionClientInstaller.exe" "$AUTODESK_FUSION_INSTALLER_URL"
-
-    # Search for an existing installer of WEBVIEW2 and download it if it doesn't exist or is older than 7 days
     download_file "WebView2installer.exe" "$WEBVIEW2_INSTALLER_URL"
- 
-    # Download all tested extensions for Autodesk Fusion 360 on Linux
+
     if (( DOWNLOAD_EXTENSIONS )); then
         download_extensions_files
     fi
 
-    # Download the patched Qt6WebEngineCore.dll file
     download_file "Qt6WebEngineCore.dll.7z" "$QT6_WEBENGINECORE_URL"
-
-    # Download the patched siappdll.dll file
     download_file "siappdll.dll" "$SIAPPDLL_URL"
 
     mkdir -p "$SELECTED_DIRECTORY/downloads/$GPU_DRIVER"
-    # Download the DXVK registry file if the DXVK GPU driver is selected
     if [[ $GPU_DRIVER == "DXVK" ]]; then
         download_file "DXVK.reg" "$REPO_URL/files/setup/resource/video_driver/DXVK/DXVK.reg" "$SELECTED_DIRECTORY/downloads/DXVK"
     fi
     download_file "NMachineSpecificOptions.xml" "$REPO_URL/files/setup/resource/video_driver/$GPU_DRIVER/NMachineSpecificOptions.xml" "$SELECTED_DIRECTORY/downloads/$GPU_DRIVER"
 
-    # Download Autodesk Fusion SVG!
     download_file "autodesk_fusion.svg" "$REPO_URL/files/setup/resource/graphics/autodesk_fusion.svg" "$SELECTED_DIRECTORY/resources/graphics"
     download_file "Autodesk Fusion.desktop" "$REPO_URL/files/setup/resource/.desktop/Autodesk%20Fusion.desktop" "$SELECTED_DIRECTORY/.desktop"
     download_file "adskidmgr-opener.desktop" "$REPO_URL/files/setup/resource/.desktop/adskidmgr-opener.desktop" "$SELECTED_DIRECTORY/.desktop"
 
-    # Download some script files for Autodesk Fusion 360!
     download_file "autodesk_fusion_launcher.sh" "$REPO_URL/files/setup/data/autodesk_fusion_launcher.sh" "$SELECTED_DIRECTORY/bin"
     chmod +x "$SELECTED_DIRECTORY/bin/autodesk_fusion_launcher.sh"
 }
@@ -787,29 +692,35 @@ download_file() {
         echo -e "$(gettext "${GREEN}$FILE_NAME exists!${NOCOLOR}")"
         if find "$FILE" -mtime +7 | grep -q .; then
             echo -e "$(gettext "${YELLOW}$FILE_NAME exists but is older than 7 days and will be updated!")${NOCOLOR}"
-            rm -rf "$FILE"
+            rm -f "$FILE"
             curl -L "$FILE_URL" -o "$FILE"
         fi
     else
         echo -e "$(gettext "${YELLOW}$FILE_NAME doesn't exist and will be downloaded for you!${NOCOLOR}")"
         curl -L "$FILE_URL" -o "$FILE"
     fi
-    
+
+    # Validate .exe files are actually PE binaries, not error pages
+    if [[ "$FILE_NAME" == *.exe ]]; then
+        if ! file "$FILE" | grep -q "PE32"; then
+            echo -e "${RED}ERROR: $FILE_NAME does not appear to be a valid Windows executable!${NOCOLOR}"
+            echo -e "${RED}Download may have failed. File header: $(head -c 200 "$FILE")${NOCOLOR}"
+            exit 1
+        fi
+    fi
 }
 
 ##############################################################################################################################################################################
-# CHECK AND INSTALL WINE FOR THE INSTALLER:                                                                                                                                  #
+# CHECK AND INSTALL WINE:                                                                                                                                                    #
 ##############################################################################################################################################################################
 
 check_and_install_wine() {
-    # Check if wine is installed
     if [ -x "$(command -v wine)" ]; then
         echo "Wine is installed!"
-        WINE_VERSION="$(wine --version  | cut -d ' ' -f1 | sed -e 's/wine-//' -e 's/-rc.*//')"
+        WINE_VERSION="$(wine --version | cut -d ' ' -f1 | sed -e 's/wine-//' -e 's/-rc.*//')"
         WINE_VERSION_MAJOR_RELEASE="$(echo $WINE_VERSION | cut -d '.' -f1)"
         WINE_VERSION_MINOR_RELEASE="$(echo $WINE_VERSION | cut -d '.' -f2)"
-        
-        # Check if the installed wine version is at least 9.8 or higher (wine_version_series and wine_version_series_release)
+
         if [ "$WINE_VERSION_MAJOR_RELEASE" -gt 9 ] || ([ "$WINE_VERSION_MAJOR_RELEASE" -eq 9 ] && [ "$WINE_VERSION_MINOR_RELEASE" -ge 8 ]); then
             echo "Wine version $WINE_VERSION is installed!"
             WINE_STATUS=1
@@ -817,15 +728,13 @@ check_and_install_wine() {
             echo "Wine version $WINE_VERSION is installed, but this version is too old and will be updated for you!"
             WINE_STATUS=0
         fi
-
     else
         echo "Wine is not installed on your system and will be installed for you!"
         WINE_STATUS=0
     fi
 
-    # Check wine status 0 and install Wine version 
     if [ "$WINE_STATUS" -eq 0 ]; then
-        DISTRO_VERSION=$(lsb_release -ds) # Check which Linux Distro is used! <-- Still in progress!!!
+        DISTRO_VERSION=$(lsb_release -ds)
         if [[ $DISTRO_VERSION == *"Arch"*"Linux"* ]] || [[ $DISTRO_VERSION == *"Manjaro"*"Linux"* ]] || [[ $DISTRO_VERSION == *"EndeavourOS"* ]] || [[ $DISTRO_VERSION == *"CachyOS"* ]]; then
             echo "Installing Wine for Arch Linux ..."
             if grep -q '^\[multilib\]$' /etc/pacman.conf; then
@@ -940,33 +849,26 @@ check_and_install_wine() {
             echo "1) WineHQ Repository"
             echo "2) openSUSE-Wine-OBS Repository"
             read -p "Enter your choice (1 or 2): " wine_repo_choice
-
             case $wine_repo_choice in
-                1)
-                    echo -e "$(gettext "${GREEN}WineHQ Repository selected. The WineHQ Repository will be used for the installation.${NOCOLOR}")"
-                    pkexec bash -c '
-                        dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
-                        dnf remove -y wine wine-*
-                        dnf install -y winehq-staging'
-                    ;;
-                2)
-                    echo -e "$(gettext "${GREEN}openSUSE-Wine-OBS Repository selected. The openSUSE-Wine-OBS Repository will be used for the installation.${NOCOLOR}")"
-                    pkexec bash -c '
-                        rpm --import https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_43/repodata/repomd.xml.key
-                        dnf config-manager --add-repo https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_43/
-                        dnf remove -y wine wine-*
-                        dnf install -y winehq-staging'
-                    ;;
-                *)
-                    echo -e "$(gettext "${RED}Invalid choice. The WineHQ Repository will be used for the installation.${NOCOLOR}")"
-                    pkexec bash -c '
-                        dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
-                        dnf remove -y wine wine-*
-                        dnf install -y winehq-staging'
-                    ;;
+                1) echo -e "$(gettext "${GREEN}WineHQ Repository selected.${NOCOLOR}")"
+                   pkexec bash -c '
+                       dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
+                       dnf remove -y wine wine-*
+                       dnf install -y winehq-staging' ;;
+                2) echo -e "$(gettext "${GREEN}openSUSE-Wine-OBS Repository selected.${NOCOLOR}")"
+                   pkexec bash -c '
+                       rpm --import https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_43/repodata/repomd.xml.key
+                       dnf config-manager --add-repo https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_43/
+                       dnf remove -y wine wine-*
+                       dnf install -y winehq-staging' ;;
+                *) echo -e "$(gettext "${RED}Invalid choice. Defaulting to WineHQ Repository.${NOCOLOR}")"
+                   pkexec bash -c '
+                       dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
+                       dnf remove -y wine wine-*
+                       dnf install -y winehq-staging' ;;
             esac
         elif [[ $DISTRO_VERSION == *"Fedora"*"Rawhide"* ]]; then
-            echo "Installing Wine for Fedora rawhide ..."
+            echo "Installing Wine for Fedora Rawhide ..."
             pkexec bash -c '
                 dnf config-manager --add-repo https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_Rawhide/
                 dnf remove wine wine-*
@@ -977,12 +879,8 @@ check_and_install_wine() {
         elif [[ $DISTRO_VERSION == *"openSUSE"*"15.6"* ]]; then
             echo "Installing Wine for openSUSE 15.6 ..."
             pkexec bash -c '
-                repos=$(zypper repos --uri | grep wine | awk '{print $1}')
-                # Remove each identified repository
-                for repo in $repos; do
-                    echo "Removing repository: $repo"
-                    zypper removerepo "$repo"
-                done
+                repos=$(zypper repos --uri | grep wine | awk "{print \$1}")
+                for repo in $repos; do zypper removerepo "$repo"; done
                 zypper addrepo -cfp 90 "https://download.opensuse.org/repositories/Emulators:/Wine/15.6/" wine
                 zypper refresh
                 zypper remove wine wine-* winetricks --no-confirm
@@ -990,47 +888,39 @@ check_and_install_wine() {
         elif [[ $DISTRO_VERSION == *"openSUSE"*"16.0"* ]]; then
             echo "Installing Wine for openSUSE 16.0 ..."
             pkexec bash -c '
-                repos=$(zypper repos --uri | grep wine | awk '{print $1}')
-                # Remove each identified repository
-                for repo in $repos; do
-                    echo "Removing repository: $repo"
-                    zypper removerepo "$repo"
-                done
+                repos=$(zypper repos --uri | grep wine | awk "{print \$1}")
+                for repo in $repos; do zypper removerepo "$repo"; done
                 zypper addrepo -cfp 90 "https://download.opensuse.org/repositories/Emulators:/Wine/16.0/" wine
                 zypper refresh
                 zypper remove wine wine-* winetricks --no-confirm
                 zypper install -y wine'
         elif [[ $DISTRO_VERSION == *"openSUSE"*"Tumbleweed"* ]]; then
-            echo "Installing Wine for openSUSE tumbleweed ..."
+            echo "Installing Wine for openSUSE Tumbleweed ..."
             pkexec bash -c '
-                repos=$(zypper repos --uri | grep wine | awk '{print $1}')
-                # Remove each identified repository
-                for repo in $repos; do
-                    echo "Removing repository: $repo"
-                    zypper removerepo "$repo"
-                done
+                repos=$(zypper repos --uri | grep wine | awk "{print \$1}")
+                for repo in $repos; do zypper removerepo "$repo"; done
                 zypper addrepo -cfp 90 "https://download.opensuse.org/repositories/Emulators:/Wine/openSUSE_Tumbleweed/" wine
                 zypper refresh
                 zypper remove wine wine-* winetricks --no-confirm
                 zypper install -y wine'
         elif [[ $DISTRO_VERSION == *"Red"*"Hat"*"Enterprise"*"Linux"* ]] || [[ $DISTRO_VERSION == *"Alma"*"Linux"* ]] || [[ $DISTRO_VERSION == *"Rocky"*"Linux"* ]]; then
             echo "Installing Wine for RHEL 9, 10, ..."
-            if command -v dnf &> /dev/null; then # Use dnf for newer distributions
+            if command -v dnf &> /dev/null; then
                 pkexec bash -c '
-                    dnf -y groupinstall 'Development Tools'
+                    dnf -y groupinstall "Development Tools"
                     dnf -y install gcc libX11-devel freetype-devel zlib-devel libxcb-devel libxslt-devel
                     curl -L https://dl.winehq.org/wine/source/11.x/wine-11.1.tar.xz -o /tmp/wine-11.1.tar.xz
                     tar -xvf /tmp/wine-11.1.tar.xz -C /tmp/
-                    ./tmp/wine-11.1/configure --enable-win64
+                    /tmp/wine-11.1/configure --enable-win64
                     make -C /tmp/wine-11.1
                     make -C /tmp/wine-11.1 install'
-            else  # Use yum for older distributions
+            else
                 pkexec bash -c '
-                    yum -y groupinstall 'Development Tools'
+                    yum -y groupinstall "Development Tools"
                     yum install gcc libX11-devel freetype-devel zlib-devel libxcb-devel libxslt-devel
                     curl -L https://dl.winehq.org/wine/source/11.x/wine-11.1.tar.xz -o /tmp/wine-11.1.tar.xz
                     tar -xvf /tmp/wine-11.1.tar.xz -C /tmp/
-                    ./tmp/wine-11.1/configure --enable-win64
+                    /tmp/wine-11.1/configure --enable-win64
                     make -C /tmp/wine-11.1
                     make -C /tmp/wine-11.1 install'
             fi
@@ -1042,36 +932,28 @@ check_and_install_wine() {
             pkexec xbps-install -Syu --yes wine
         elif [[ $DISTRO_VERSION == *"NixOS"* ]] || [[ $DISTRO_VERSION == *"nixos"* ]]; then
             echo "Installing Wine for NixOS ..."
-            pkexec nix-env -iA nixos.wine nixos.winetricks --yes
-        # Add more distributions and versions here ...
-        # elif ...
+            pkexec nix-env -iA nixos.wine nixos.winetricks
         else
             echo "Error: Your Linux distribution and version are not supported."
         fi
     fi
 }
 
-
 ##############################################################################################################################################################################
 # HELPER FUNCTION FOR THE LOGIN CALLBACKS TO THE IDENTITY MANAGER:                                                                                                           #
 ##############################################################################################################################################################################
 
-# Helper function for the following function. The AdskIdentityManager.exe can be installed 
-# into a variable alphanumeric folder.
-# This function finds that folder alphanumeric folder name.
 determine_variable_folder_name_for_identity_manager() {
     echo "Searching for the variable location of the Autodesk Fusion identity manager..."
     IDENT_MAN_PATH=$(find "$WINE_PFX" -name 'AdskIdentityManager.exe')
-    # Get the dirname of the identity manager's alphanumeric folder.
-    # With the full path of the identity manager, go 2 folders up and isolate the folder name.
     IDENT_MAN_VARIABLE_DIRECTORY=$(basename "$(dirname "$(dirname "$IDENT_MAN_PATH")")")
 }
 
-########################################################################################
+##############################################################################################################################################################################
+# LOAD ICONS AND DESKTOP FILES:                                                                                                                                              #
+##############################################################################################################################################################################
 
-# Load the icons and .desktop-files:
 autodesk_fusion_shortcuts_load() {
-    # Create a .desktop file (launcher.sh) for Autodesk Fusion!
     DESKTOP_DIRECTORY="$HOME/.local/share/applications/wine/Programs/Autodesk"
     mkdir -p "$DESKTOP_DIRECTORY"
     rm -f "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
@@ -1079,52 +961,24 @@ autodesk_fusion_shortcuts_load() {
     echo "Exec=$SELECTED_DIRECTORY/bin/autodesk_fusion_launcher.sh" >> "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
     echo "Icon=$SELECTED_DIRECTORY/resources/graphics/autodesk_fusion.svg" >> "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
     echo "Path=$SELECTED_DIRECTORY/bin" >> "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
-
-    # Set the permissions for the .desktop file to read-only
     chmod 444 "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
 
-
-    # Execute function
     determine_variable_folder_name_for_identity_manager
 
-    #Create mimetype link to handle web login call backs to the Identity Manager
     rm -f "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop"
     cp "$SELECTED_DIRECTORY/.desktop/adskidmgr-opener.desktop" "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop"
     echo "Exec=sh -c 'env WINEPREFIX=$WINE_PFX wine \"\$(find $WINE_PFX -name AdskIdentityManager.exe | head -1)\" \"%u\"'" >> "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop"
-
-    #Set the permissions for the .desktop file to read-only
     chmod 444 "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop"
-    
-    #Set the mimetype handler for the Identity Manager
+
     xdg-mime default adskidmgr-opener.desktop x-scheme-handler/adskidmgr
 
-    #Disable Debug messages on regular runs, we dont have a terminal, so speed up the system by not wasting time prining them into the Void
     sed -i 's/=env WINEPREFIX=/=env WINEDEBUG=-all env WINEPREFIX=/g' "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
 }
 
-###############################################################################################################################################################
+##############################################################################################################################################################################
+# EXECUTE THE INSTALLATION OF AUTODESK FUSION:                                                                                                                               #
+##############################################################################################################################################################################
 
-# Execute the installation of Autodesk Fusion
-autodesk_fusion_run_install_client() {
-    WINEPREFIX="$WINE_PFX" timeout -k 10m 9m wine \
-        "$SELECTED_DIRECTORY/downloads/FusionClientInstaller.exe" --quiet \
-        2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_1.log"
-    
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}FusionClientInstaller failed! Check logs. Aborting.${NOCOLOR}"
-        exit 1
-    echo -e "$(gettext "${YELLOW}Installing Autodesk Fusion 360 Client ...${NOCOLOR}")"
-    sleep 2
-    WINEPREFIX="$WINE_PFX" timeout -k 10m 9m wine "$SELECTED_DIRECTORY/downloads/FusionClientInstaller.exe" --quiet 2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_1.log"
-    sleep 5
-    echo -e "$(gettext "${YELLOW}Finalizing Autodesk Fusion 360 installation...${NOCOLOR}")"
-    WINEPREFIX="$WINE_PFX" timeout -k 5m 1m wine "$SELECTED_DIRECTORY/downloads/FusionClientInstaller.exe" --quiet 2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_2.log"
-    echo -e "$(gettext "${GREEN}Autodesk Fusion 360 Client installation completed!${NOCOLOR}")"
-}
-
-###############################################################################################################################################################
-
-# Patch the Qt6WebEngineCore.dll to fix the login issue and other issues
 autodesk_fusion_run_install_client() {
     echo -e "$(gettext "${YELLOW}Installing Autodesk Fusion 360 Client ...${NOCOLOR}")"
     sleep 2
@@ -1133,7 +987,7 @@ autodesk_fusion_run_install_client() {
         2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_1.log"
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}FusionClientInstaller failed (exit code $?)! Check logs. Aborting.${NOCOLOR}"
+        echo -e "${RED}FusionClientInstaller failed! Check $SELECTED_DIRECTORY/logs/FusionClientInstaller_1.log for details. Aborting.${NOCOLOR}"
         exit 1
     fi
 
@@ -1144,44 +998,60 @@ autodesk_fusion_run_install_client() {
         2>> "$SELECTED_DIRECTORY/logs/FusionClientInstaller_2.log"
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Fusion finalization step failed! Check FusionClientInstaller_2.log. Aborting.${NOCOLOR}"
+        echo -e "${RED}Fusion finalization step failed! Check $SELECTED_DIRECTORY/logs/FusionClientInstaller_2.log for details. Aborting.${NOCOLOR}"
         exit 1
     fi
 
     echo -e "$(gettext "${GREEN}Autodesk Fusion 360 Client installation completed!${NOCOLOR}")"
-}  
-
-###############################################################################################################################################################
-
-# Add/Patch the siappdll.dll to fix the SpaceMouse issue
-
-autodesk_fusion_patch_siappdll() {
-    echo -e "${YELLOW}Patching the siappdll.dll file for Autodesk Fusion ...${NOCOLOR}"
-    sleep 2
-    
-    # Check if the siappdll.dll file exists before attempting to backup
-    if [ -f "$QT6_WEBENGINECORE_DIR/siappdll.dll" ]; then
-        # Backup the siappdll.dll file
-        cp -f "$QT6_WEBENGINECORE_DIR/siappdll.dll" "$QT6_WEBENGINECORE_DIR/siappdll.dll.bak"
-        echo -e "${GREEN}The siappdll.dll file is backed up as siappdll.dll.bak!${NOCOLOR}"
-    else
-        echo -e "${RED}The siappdll.dll file does not exist. No backup was made.${NOCOLOR}"
-    fi
-
-    # Copy the patched siappdll.dll file to the Autodesk Fusion directory
-    cp -f "$SELECTED_DIRECTORY/downloads/siappdll.dll" "$QT6_WEBENGINECORE_DIR/siappdll.dll"
-    echo -e "${GREEN}The siappdll.dll file is patched successfully!${NOCOLOR}"
 }
 
-###############################################################################################################################################################
+##############################################################################################################################################################################
+# PATCH Qt6WebEngineCore.dll TO FIX LOGIN AND OTHER ISSUES:                                                                                                                  #
+##############################################################################################################################################################################
 
-# Wine configuration for Autodesk Fusion
+autodesk_fusion_patch_qt6webenginecore() {
+    QT6_WEBENGINECORE=$(find "$WINE_PFX" -name 'Qt6WebEngineCore.dll' -printf "%T+ %p\n" | sort -r | head -n 1 | sed -r 's/^[^ ]+ //')
+    QT6_WEBENGINECORE_DIR=$(dirname "$QT6_WEBENGINECORE")
+
+    echo -e "${YELLOW}The old Qt6WebEngineCore.dll file is located in: $QT6_WEBENGINECORE_DIR${NOCOLOR}"
+
+    if [ -f "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll" ]; then
+        cp -f "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll" "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll.bak"
+        echo -e "${GREEN}Qt6WebEngineCore.dll backed up as Qt6WebEngineCore.dll.bak${NOCOLOR}"
+    else
+        echo -e "${RED}Qt6WebEngineCore.dll does not exist. No backup was made.${NOCOLOR}"
+    fi
+
+    echo -e "${YELLOW}Patching Qt6WebEngineCore.dll for Autodesk Fusion ...${NOCOLOR}"
+    sleep 2
+    cp -f "$SELECTED_DIRECTORY/downloads/Qt6WebEngineCore.dll" "$QT6_WEBENGINECORE_DIR/Qt6WebEngineCore.dll"
+    echo -e "${GREEN}Qt6WebEngineCore.dll patched successfully!${NOCOLOR}"
+}
+
+##############################################################################################################################################################################
+# PATCH siappdll.dll TO FIX SPACEMOUSE ISSUE:                                                                                                                                #
+##############################################################################################################################################################################
+
+autodesk_fusion_patch_siappdll() {
+    echo -e "${YELLOW}Patching siappdll.dll for Autodesk Fusion ...${NOCOLOR}"
+    sleep 2
+
+    if [ -f "$QT6_WEBENGINECORE_DIR/siappdll.dll" ]; then
+        cp -f "$QT6_WEBENGINECORE_DIR/siappdll.dll" "$QT6_WEBENGINECORE_DIR/siappdll.dll.bak"
+        echo -e "${GREEN}siappdll.dll backed up as siappdll.dll.bak${NOCOLOR}"
+    else
+        echo -e "${RED}siappdll.dll does not exist. No backup was made.${NOCOLOR}"
+    fi
+
+    cp -f "$SELECTED_DIRECTORY/downloads/siappdll.dll" "$QT6_WEBENGINECORE_DIR/siappdll.dll"
+    echo -e "${GREEN}siappdll.dll patched successfully!${NOCOLOR}"
+}
+
+##############################################################################################################################################################################
+# WINE CONFIGURATION AND INSTALLATION OF AUTODESK FUSION:                                                                                                                    #
+##############################################################################################################################################################################
+
 wine_autodesk_fusion_install() {
-    # Note that the winetricks sandbox verb merely removes the desktop integration and Z: drive symlinks and is not a "true" sandbox.
-    # It protects against errors rather than malice. It's useful for, e.g., keeping games from saving their settings in random subdirectories of your home directory.
-    # But it still ensures that wine, for example, no longer has access permissions to Home!
-    # For this reason, the EXE files must be located directly in the Wineprefix folder!
-
     echo -e "$(gettext "${YELLOW}Setting up the Wine prefix for Autodesk Fusion 360 in Sandbox... (suppressed)${NOCOLOR}")"
     WINEPREFIX="$WINE_PFX" sh "$SELECTED_DIRECTORY/bin/winetricks" -q sandbox >> "$SELECTED_DIRECTORY/logs/winetricks_sandbox.log" 2>&1
 
@@ -1191,53 +1061,46 @@ wine_autodesk_fusion_install() {
 
     echo -e "$(gettext "${YELLOW}Configuring the Wine prefix for Autodesk Fusion 360...${NOCOLOR}")"
     sleep 5
-    # If Mono or Gecko were not installed correctly in your Wine prefix:
     WINEPREFIX="$WINE_PFX" wine control.exe appwiz.cpl install_mono
     WINEPREFIX="$WINE_PFX" wine control.exe appwiz.cpl install_gecko
     sleep 5
-    # We must install some packages!
     WINEPREFIX="$WINE_PFX" sh "$SELECTED_DIRECTORY/bin/winetricks" -q atmlib gdiplus arial corefonts cjkfonts dotnet452 msxml4 msxml6 vcrun2017 fontsmooth=rgb winhttp win10 2>> "$SELECTED_DIRECTORY/logs/winetricks_dotnet452.log"
-    # We must install cjkfonts again then sometimes it doesn't work in the first time!
+
     echo -e "$(gettext "${YELLOW}Re-installing cjkfonts... (suppressed)${NOCOLOR}")"
     sleep 5
     WINEPREFIX="$WINE_PFX" sh "$SELECTED_DIRECTORY/bin/winetricks" -q cjkfonts >> "$SELECTED_DIRECTORY/logs/winetricks_cjkfonts_2.log" 2>&1
-    # We must set to Windows 10 or 11 again because some other winetricks sometimes set it back to Windows XP!
+
     echo -e "$(gettext "${YELLOW}Setting Windows 11 as the Windows version... (suppressed)${NOCOLOR}")"
     sleep 5
     WINEPREFIX="$WINE_PFX" sh "$SELECTED_DIRECTORY/bin/winetricks" -q win11 >> "$SELECTED_DIRECTORY/logs/winetricks_win11.log" 2>&1
-    # Remove tracking metrics/calling home
+
     sleep 5
     WINEPREFIX="$WINE_PFX" wine REG ADD "HKCU\Software\Wine\DllOverrides" /v "adpclientservice.exe" /t REG_SZ /d "" /f
-    # Navigation bar does not work well with anything other than the wine builtin DX9
     WINEPREFIX="$WINE_PFX" wine REG ADD "HKCU\Software\Wine\DllOverrides" /v "AdCefWebBrowser.exe" /t REG_SZ /d builtin /f
-    # Use Visual Studio Redist that is bundled with the application
     WINEPREFIX="$WINE_PFX" wine REG ADD "HKCU\Software\Wine\DllOverrides" /v "msvcp140" /t REG_SZ /d native /f
     WINEPREFIX="$WINE_PFX" wine REG ADD "HKCU\Software\Wine\DllOverrides" /v "mfc140u" /t REG_SZ /d native /f
-    # Fixed the problem with the bcp47langs issue and now the login works again!
     WINEPREFIX="$WINE_PFX" wine reg add "HKCU\Software\Wine\DllOverrides" /v "bcp47langs" /t REG_SZ /d "" /f
+
     sleep 5
-    # Install 7-Zip inside the Wine prefix via winetricks.
-    # This method does NOT require 7-Zip on the host system and is more stable/reliable than previous approaches.
     WINEPREFIX="$WINE_PFX" sh "$SELECTED_DIRECTORY/bin/winetricks" -q 7zip >> "$SELECTED_DIRECTORY/logs/winetricks_7zip.log" 2>&1
     WINEPREFIX="$WINE_PFX" wine "$WINE_PFX/drive_c/Program Files/7-Zip/7z.exe" x "C:\\users\\$USER\\Downloads\\Qt6WebEngineCore.dll.7z" -o"C:\\users\\$USER\\Downloads\\"
-    # Disabled by Default - Configure the correct virtual desktop resolution
-    # WINEPREFIX="$WINE_PFX" sh "$SELECTED_DIRECTORY/bin/winetricks" -q vd="$MONITOR_RESOLUTION"
-    # Download and install WebView2 to handle Login attempts, required even though we redirect to your default browser
+
     echo -e "$(gettext "${YELLOW}Installing Microsoft Edge WebView2 Runtime for Autodesk Fusion ...${NOCOLOR}")"
     sleep 2
     WINEPREFIX="$WINE_PFX" wine "$SELECTED_DIRECTORY/downloads/WebView2installer.exe" /silent /install 2>> "$SELECTED_DIRECTORY/logs/WebView2_install.log"
     echo -e "$(gettext "${GREEN}Microsoft Edge WebView2 Runtime installation completed!${NOCOLOR}")"
-    # Pre-create shortcut directory for latest re-branding Microsoft Edge WebView2
+
     APPDATA_DIRECTORY="$WINE_PFX/drive_c/users/$USER/AppData"
     APPLICATION_DATA_DIRECTORY="$WINE_PFX/drive_c/users/$USER/Application Data"
     mkdir -p "$APPDATA_DIRECTORY/Roaming/Microsoft/Internet Explorer/Quick Launch/User Pinned"
 
     if [[ $GPU_DRIVER = "DXVK" ]]; then
         WINEPREFIX="$WINE_PFX" sh "$SELECTED_DIRECTORY/bin/winetricks" -q dxvk
-        # Add the "return"-option. Here you can read more about it -> https://github.com/koalaman/shellcheck/issues/592
         WINEPREFIX="$WINE_PFX" wine regedit.exe "C:\\users\\$USER\\Downloads\\DXVK\\DXVK.reg"
     fi
+
     autodesk_fusion_run_install_client
+
     mkdir -p "$APPDATA_DIRECTORY/Roaming/Autodesk/Neutron Platform/Options"
     mkdir -p "$APPDATA_DIRECTORY/Local/Autodesk/Neutron Platform/Options"
     mkdir -p "$APPLICATION_DATA_DIRECTORY/Autodesk/Neutron Platform/Options"
@@ -1246,9 +1109,10 @@ wine_autodesk_fusion_install() {
     cp "$SELECTED_DIRECTORY/downloads/$GPU_DRIVER/NMachineSpecificOptions.xml" "$APPLICATION_DATA_DIRECTORY/Autodesk/Neutron Platform/Options/NMachineSpecificOptions.xml" || return
 }
 
-###############################################################################################################################################################
+##############################################################################################################################################################################
+# CHECK AND INSTALL SELECTED EXTENSIONS:                                                                                                                                     #
+##############################################################################################################################################################################
 
-# Check and install the selected extensions
 wine_autodesk_fusion_install_extensions() {
     if [[ "$SELECTED_EXTENSIONS" == *"CzechlocalizationforF360"* ]]; then
         run_install_extension_client "Ceska_lokalizace_pro_Autodesk_Fusion.exe"
@@ -1277,10 +1141,11 @@ run_install_extension_client() {
     fi
 }
 
-###############################################################################################################################################################
+##############################################################################################################################################################################
+# SAVE LOG FILE:                                                                                                                                                             #
+##############################################################################################################################################################################
 
 autodesk_fusion_safe_logfile() {
-    # Log the Wineprefixes
     echo "$GPU_DRIVER" >> "$SELECTED_DIRECTORY/logs/wineprefixes.log"
     echo "$SELECTED_DIRECTORY" >> "$SELECTED_DIRECTORY/logs/wineprefixes.log"
     echo "$WINE_PFX" >> "$SELECTED_DIRECTORY/logs/wineprefixes.log"
@@ -1288,9 +1153,13 @@ autodesk_fusion_safe_logfile() {
 
 ##############################################################################################################################################################################
 # PATCH THE DOWNLOADED LAUNCHER TO REMOVE STEAM/PROTON DEPENDENCY:                                                                                                           #
-# The upstream autodesk_fusion_launcher.sh hard-codes paths into Steam's Proton runtime                                                                                      #
-# (~/.local/share/Steam/compatibilitytools.d/DXVK/proton) which do not exist on systems                                                                                      #
-# without Steam. This function rewrites those lines to use the system Wine binary instead.                                                                                    #
+# The upstream autodesk_fusion_launcher.sh uses a PROTON_VERSION variable to decide whether                                                                                  #
+# to launch via Wine or Proton. If it is not set to "Wine" it always tries the Proton path,                                                                                  #
+# which fails on systems without Steam. This function uses Python to reliably patch:                                                                                          #
+#   1. PROTON_VERSION forced to "Wine"                                                                                                                                        #
+#   2. WINE variable set to system wine binary                                                                                                                                #
+#   3. WINESERVER variable set to system wineserver binary                                                                                                                    #
+#   4. run_autodesk_fusion_proton() body replaced as a final safety net                                                                                                       #
 ##############################################################################################################################################################################
 
 patch_launcher_remove_steam_dependency() {
@@ -1301,12 +1170,8 @@ patch_launcher_remove_steam_dependency() {
         return 1
     fi
 
-    echo -e "${YELLOW}Patching launcher to remove Steam/Proton dependency...${NOCOLOR}"
-
-    # Resolve the real wine and wineserver binaries
-    local WINE_BIN
+    local WINE_BIN WINESERVER_BIN
     WINE_BIN=$(command -v wine)
-    local WINESERVER_BIN
     WINESERVER_BIN=$(command -v wineserver)
 
     if [ -z "$WINE_BIN" ] || [ -z "$WINESERVER_BIN" ]; then
@@ -1314,36 +1179,65 @@ patch_launcher_remove_steam_dependency() {
         return 1
     fi
 
-    # Replace any line that sets WINE or wine to a Steam/Proton path with the system binary.
-    # Handles patterns like:
-    #   WINE="$HOME/.local/share/Steam/compatibilitytools.d/DXVK/proton"
-    #   wine="..."
-    #   /home/.../.local/share/Steam/compatibilitytools.d/DXVK/proton ...args...
-    sed -i \
-        -e "s|['\"]\\?\$HOME/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/proton['\"]\\?|\"$WINE_BIN\"|g" \
-        -e "s|['\"]\\?\$HOME/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/files/bin/wineserver['\"]\\?|\"$WINESERVER_BIN\"|g" \
-        -e "s|['\"]\\?/home/[^/]*/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/proton['\"]\\?|\"$WINE_BIN\"|g" \
-        -e "s|['\"]\\?/home/[^/]*/\.local/share/Steam/compatibilitytools\.d/[^'\"[:space:]]*/files/bin/wineserver['\"]\\?|\"$WINESERVER_BIN\"|g" \
-        "$LAUNCHER"
+    echo -e "${YELLOW}Patching launcher to use system Wine instead of Steam/Proton...${NOCOLOR}"
 
-    # Patch any Steam background launch lines (e.g. "Starting Steam (background, no window)...")
-    # by removing or no-op-ing them.
-    sed -i \
-        -e '/Starting Steam/d' \
-        -e '/steam.*background/Id' \
-        "$LAUNCHER"
+    python3 - "$LAUNCHER" "$WINE_BIN" "$WINESERVER_BIN" <<'PYEOF'
+import sys, re
 
-    echo -e "${GREEN}Launcher patched successfully. Using system wine: $WINE_BIN${NOCOLOR}"
+launcher_path, wine_bin, wineserver_bin = sys.argv[1:]
+
+with open(launcher_path) as f:
+    content = f.read()
+
+# 1. Force PROTON_VERSION="Wine" so the dispatcher always calls run_autodesk_fusion_wine
+content = re.sub(
+    r'^(PROTON_VERSION\s*=\s*).*',
+    r'\1"Wine"',
+    content, flags=re.MULTILINE
+)
+
+# 2. Fix the WINE variable to point to the system binary
+content = re.sub(
+    r'^(\s*WINE\s*=\s*).*',
+    lambda m: f'{m.group(1)}"{wine_bin}"',
+    content, flags=re.MULTILINE
+)
+
+# 3. Fix the WINESERVER variable to point to the system binary
+content = re.sub(
+    r'^(\s*WINESERVER\s*=\s*).*',
+    lambda m: f'{m.group(1)}"{wineserver_bin}"',
+    content, flags=re.MULTILINE
+)
+
+# 4. Replace the entire run_autodesk_fusion_proton() body as a safety net,
+#    in case PROTON_VERSION is set elsewhere or the dispatch logic changes upstream
+content = re.sub(
+    r'function run_autodesk_fusion_proton\(\)\s*\{.*?\n\}',
+    'function run_autodesk_fusion_proton() {\n    # Patched by installer: Steam/Proton replaced with system Wine\n    run_autodesk_fusion_wine\n}',
+    content, flags=re.DOTALL
+)
+
+with open(launcher_path, 'w') as f:
+    f.write(content)
+
+print(f"Launcher patched: PROTON_VERSION=Wine, WINE={wine_bin}, WINESERVER={wineserver_bin}")
+PYEOF
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Launcher patched successfully.${NOCOLOR}"
+    else
+        echo -e "${RED}Launcher patch failed — check Python output above.${NOCOLOR}"
+        return 1
+    fi
 }
 
 ##############################################################################################################################################################################
-# ACTIVATE THE WINDOW NOT RESPONDING DIALOG:                                                                                                                                 #
+# RESET THE WINDOW NOT RESPONDING DIALOG:                                                                                                                                    #
 ##############################################################################################################################################################################
 
 reset_window_not_responding_dialog() {
-    # Check if desktop environment is GNOME
     if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
-        # Reset the "Window not responding" Dialog in GNOME
         echo -e "$(gettext "${GREEN}The 'Window not responding' Dialog in GNOME will be reset!")${NOCOLOR}"
         gsettings reset org.gnome.mutter check-alive-timeout
     fi
